@@ -43,5 +43,5 @@ $ bundle install
 To run the script:
 
 ```shell
-$ count <csv input file>
+$ ./count <csv input file>
 ```
