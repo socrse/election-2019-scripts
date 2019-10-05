@@ -1,9 +1,9 @@
-# SoC RSE Election 2019 Scripts
+# SocRSE Trustee Election 2019 Scripts
 ## Robert Haines and Mark Turner
 
-Scripts to validate and count votes for the Soc RSE Trustee Elections 2019
+Scripts to validate and count votes for the SocRSE Trustee Election 2019
 
-### Get the code
+## Get the code
 
 Clone the repo:
 
