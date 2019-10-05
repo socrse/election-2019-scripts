@@ -45,7 +45,7 @@ num_members = 0
 num_nonmembers = 0
 members.each do |row|
   if row[22] == 'Valid'
-    all_members << row[5]
+    all_members << row[5].downcase
     num_members += 1
   else
     num_nonmembers += 1
@@ -64,7 +64,7 @@ valid = []
 invalid = []
 
 all_voters.each do |voter|
-  if all_members.include?(voter)
+  if all_members.include?(voter.downcase)
     valid << voter
   else
     invalid << voter
