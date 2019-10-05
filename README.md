@@ -40,8 +40,9 @@ $ cd counting
 $ bundle install
 ```
 
-To run the script:
+Run the script with input from either a file or standard input:
 
 ```shell
 $ ./count <csv input file>
+$ ./count < <csv input>
 ```

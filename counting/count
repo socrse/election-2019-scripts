@@ -18,17 +18,25 @@ end
 # This many candidates are to be elected.
 VOTING_CUTOFF = 12
 
-abort 'Usage: count <csv input file>' unless ARGV.length == 1
+# Are we reading from a file or from stdin?
+if ARGV.length == 1
+  csv_file = ARGV[0].chomp
+  abort "Cannot read input file '#{csv_file}'." unless ::File.readable? csv_file
+  csv_data = ::File.read(csv_file)
+else
+  csv_data = STDIN.read
+end
 
-csv_file = ARGV[0].chomp
+# If at this point we have no data, then...
+abort "Usage:\tcount <csv input file>\n\tcount < <input>" if csv_data.empty?
 
-abort "Cannot read input file '#{csv_file}'." unless ::File.readable? csv_file
+csv = CSV.new(csv_data, headers: true)
 
 # Grab all of the votes cast into one long list.
 # Also, count the number of rows (voters), ignoring the header row.
 all_votes = []
 num_voters = 0
-CSV.foreach(csv_file, headers: true) do |row|
+csv.each do |row|
   all_votes += row[3].split(',').map(&:strip)
   num_voters += 1
 end
