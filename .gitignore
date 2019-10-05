@@ -1,2 +1,4 @@
 .ruby-version
 .ruby-gemset
+**/*.csv
+**/.DS_Store
