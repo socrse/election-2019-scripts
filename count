@@ -8,6 +8,8 @@
 require 'rubygems'
 require 'bundler'
 require 'csv'
+require 'erb'
+require 'tilt'
 
 # Helper method for exiting on error.
 def abort(message)
@@ -17,6 +19,12 @@ end
 
 # This many candidates are to be elected.
 VOTING_CUTOFF = 12
+
+# Our report template.
+FILENAME = 'report.md'
+TEMPLATE =
+  ::File.expand_path("#{FILENAME}.erb", ::File.join(__dir__, 'templates'))
+OUTPUT = ::File.expand_path(FILENAME, __dir__)
 
 # Are we reading from a file or from stdin?
 if ARGV.length == 1
@@ -57,6 +65,9 @@ if total_bucket_votes != all_votes.length
   abort 'Number of votes mismatched after bucketing ' \
     "(#{total_bucket_votes} but should be #{all_votes.length})"
 end
+
+report = Tilt.new(TEMPLATE)
+::File.write(OUTPUT, report.render(self, results: vote_buckets))
 
 # Insert the cutoff marker - purely decorative.
 vote_buckets.insert(VOTING_CUTOFF, [' ----8<---- CUTOFF ----8<---- ', nil])
