@@ -1,0 +1,119 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# (c) 2019 The Society of Research Software Engineering
+#
+# Authors: Robert Haines and Mark Turner
+
+require 'rubygems'
+require 'bundler'
+require 'csv'
+require 'erb'
+require 'tilt'
+
+# Helper method for exiting on error.
+def abort(message)
+  warn message
+  exit 1
+end
+
+# This many candidates are to be elected.
+VOTING_CUTOFF = 12
+
+# Our report template.
+FILENAME = 'report.md'
+TEMPLATE =
+  ::File.expand_path("#{FILENAME}.erb", ::File.join(__dir__, 'templates'))
+OUTPUT = ::File.expand_path(FILENAME, __dir__)
+
+# Usage text.
+USAGE = "Usage:\t#{::File.basename($0)} <csv members file> <csv voters file>"
+
+# Do we have enough arguments?
+if ARGV.length == 2
+  # Read the list of society members
+  members_file = ARGV[0].chomp
+  unless ::File.readable? members_file
+    abort "Cannot read input file '#{members_file}'."
+  end
+  members_data = ::File.read(members_file)
+
+  # Read the list of voters
+  voters_file = ARGV[1].chomp
+  unless ::File.readable? voters_file
+    abort "Cannot read input file '#{voters_file}'."
+  end
+  voters_data = ::File.read(voters_file)
+else
+  abort USAGE
+end
+
+# If at this point we have no data, then...
+abort USAGE if members_data.empty? || voters_data.empty?
+
+members = ::CSV.new(members_data, headers: true)
+voters = ::CSV.new(voters_data, headers: true)
+
+# Grab all of the valid members into one long list.
+# Also, count the number members and non-members.
+all_members = []
+num_members = 0
+num_nonmembers = 0
+members.each do |row|
+  if row[22] == 'Valid'
+    all_members << row[5].downcase
+    num_members += 1
+  else
+    num_nonmembers += 1
+  end
+end
+
+# Loop through the voters and check membership validity.
+# Store two lists of valid and invalid votes.
+valid_votes = []
+invalid_votes = []
+voters.each do |voter|
+  if all_members.include?(voter[2].downcase)
+    valid_votes << voter
+  else
+    invalid_votes << voter
+  end
+end
+
+# Grab all of the valid votes cast into one long list.
+all_votes = []
+valid_votes.each do |row|
+  all_votes += row[3].split(',').map(&:strip)
+end
+
+# Calculate voter turnout from valid votes and membership list
+turnout = (valid_votes.length.to_f / all_members.length.to_f) * 100.to_f
+
+# Bucket the votes by name, and reverse sort by bucket value.
+vote_buckets = all_votes.each_with_object(Hash.new(0)) do |name, bucket|
+  bucket[name] += 1
+end.sort_by(&:last).reverse
+
+# Double check that we don't have more than 6 votes per person.
+votes_pp = all_votes.length / valid_votes.length
+abort "Too many votes per person (#{votes_pp})" if votes_pp > 6
+
+# Double check that the amount of votes in all buckets matches the
+# total number of votes cast.
+total_bucket_votes = vote_buckets.map(&:last).sum
+if total_bucket_votes != all_votes.length
+  abort 'Number of votes mismatched after bucketing ' \
+    "(#{total_bucket_votes} but should be #{all_votes.length})"
+end
+
+report = {
+  num_members: all_members.length,
+  num_valid_votes: valid_votes.length,
+  num_invalid_votes: invalid_votes.length,
+  turnout: turnout,
+  results: vote_buckets,
+  cutoff: VOTING_CUTOFF,
+  invalid: invalid_votes
+}
+
+::File.write(OUTPUT, Tilt.new(TEMPLATE).render(self, report: report))
