@@ -13,19 +13,19 @@
 
 ### Results
 
-The following candidates are elected to the board of trustees.
+The following candidates (presented in random order) are elected to the board of trustees.
 
 | Candidate | Votes |
 |----------:|:-----:|
-<% report[:results][0].each do |name, _| %>
+<% report[:results][0].shuffle.each do |name, _| %>
 | <%= name %> | -redacted- |
 <% end %>
 
-The following candidates are *not* elected to the board of trustees.
+The following candidates (presented in random order) are *not* elected to the board of trustees.
 
 | Candidate | Votes |
 |----------:|:-----:|
-<% report[:results][1].each do |name, _| %>
+<% report[:results][1].shuffle.each do |name, _| %>
 | <%= name %> | -redacted- |
 <% end %>
 
