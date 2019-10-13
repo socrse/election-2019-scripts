@@ -33,7 +33,7 @@ The following candidates (presented in random order) are *not* elected to the bo
 
 **Number of invalid votes:** <%= report[:num_invalid_votes] %>
 
-Invalid votes were received from the following people. Votes are marked invalid if the email address of the voter does not match a validated member email address.
+Invalid votes were received from the following people. Votes are marked invalid if the voter is not a member, or the email address of the voter does not match a validated member email address.
 
 <% report[:invalid].each do |row| %>
   * <%= row[1] %> (<%= row[2] %>)
