@@ -17,7 +17,7 @@ The following candidates are elected to the board of trustees.
 
 | Candidate | Votes |
 |----------:|:-----:|
-<% report[:results][0...report[:cutoff]].each do |name, _| %>
+<% report[:results][0].each do |name, _| %>
 | <%= name %> | -redacted- |
 <% end %>
 
@@ -25,7 +25,7 @@ The following candidates are *not* elected to the board of trustees.
 
 | Candidate | Votes |
 |----------:|:-----:|
-<% report[:results][report[:cutoff]..-1].each do |name, _| %>
+<% report[:results][1].each do |name, _| %>
 | <%= name %> | -redacted- |
 <% end %>
 

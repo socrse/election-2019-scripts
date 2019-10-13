@@ -108,8 +108,7 @@ report = {
   num_valid_votes: valid_votes.length,
   num_invalid_votes: invalid_votes.length,
   turnout: turnout,
-  results: vote_buckets,
-  cutoff: VOTING_CUTOFF,
+  results: [vote_buckets[0...VOTING_CUTOFF], vote_buckets[VOTING_CUTOFF..-1]],
   invalid: invalid_votes
 }
 
