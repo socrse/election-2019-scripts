@@ -21,10 +21,7 @@ end
 VOTING_CUTOFF = 12
 
 # Our report template.
-FILENAME = 'report.md'
-TEMPLATE =
-  ::File.expand_path("#{FILENAME}.erb", ::File.join(__dir__, 'templates'))
-OUTPUT = ::File.expand_path(FILENAME, __dir__)
+REPORTS = ['report.md', 'report-redacted.md'].freeze
 
 # Usage text.
 USAGE = "Usage:\t#{::File.basename($0)} <csv members file> <csv voters file>"
@@ -116,4 +113,8 @@ report = {
   invalid: invalid_votes
 }
 
-::File.write(OUTPUT, Tilt.new(TEMPLATE).render(self, report: report))
+REPORTS.each do |name|
+  temp = ::File.expand_path("#{name}.erb", ::File.join(__dir__, 'templates'))
+  output = ::File.expand_path(name, __dir__)
+  ::File.write(output, Tilt.new(temp).render(self, report: report))
+end

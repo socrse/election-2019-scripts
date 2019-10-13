@@ -1,0 +1,40 @@
+# The Society of Research Software Engineering
+## Trustee Election 2019
+
+----
+
+### Summary Information
+
+**Membership eligible to vote:** <%= report[:num_members] %>
+
+**Number of valid votes:** <%= report[:num_valid_votes] %>
+
+**Voter turnout:** <%= report[:turnout].round(2) %>%
+
+### Results
+
+The following candidates are elected to the board of trustees.
+
+| Candidate | Votes |
+|----------:|:-----:|
+<% report[:results][0...report[:cutoff]].each do |name, _| %>
+| <%= name %> | -redacted- |
+<% end %>
+
+The following candidates are *not* elected to the board of trustees.
+
+| Candidate | Votes |
+|----------:|:-----:|
+<% report[:results][report[:cutoff]..-1].each do |name, _| %>
+| <%= name %> | -redacted- |
+<% end %>
+
+### Invalid votes
+
+**Number of invalid votes:** <%= report[:num_invalid_votes] %>
+
+Invalid votes were received from the following people. Votes are marked invalid if the email address of the voter does not match a validated member email address.
+
+<% report[:invalid].each do |row| %>
+  * <%= row[1] %> (<%= row[2] %>)
+<% end %>
