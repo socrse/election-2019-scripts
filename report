@@ -36,6 +36,11 @@ opts = OptionParser.new do |opt|
     options[:cutoff] = val.chomp.to_i
   end
   opt.on(
+    '-r', '--redact', 'Redact the report of vote counts and email addresses.'
+  ) do
+    options[:report] = 'report-redacted'
+  end
+  opt.on(
     '-yN', '--year=N', 'Set the year for the report. ' \
     "Default: #{options[:year]}."
   ) do |val|
