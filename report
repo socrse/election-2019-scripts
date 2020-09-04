@@ -23,7 +23,8 @@ REPORTS = ['report.md', 'report-redacted.md'].freeze
 
 # Parse options.
 options = {
-  cutoff: 6
+  cutoff: 6,
+  year: Time.now.year
 }
 
 opts = OptionParser.new do |opt|
@@ -35,6 +36,12 @@ opts = OptionParser.new do |opt|
     "Default: #{options[:cutoff]}."
   ) do |val|
     options[:cutoff] = val.chomp.to_i
+  end
+  opt.on(
+    '-yN', '--year=N', 'Set the year for the report. ' \
+    "Default: #{options[:year]}."
+  ) do |val|
+    options[:year] = val.chomp.to_i
   end
 
   opt.on_tail('-h', '-?', '--help', 'Show this help message.') do
@@ -121,6 +128,7 @@ if total_bucket_votes != all_votes.length
 end
 
 report = {
+  year: options[:year],
   num_members: all_members.length,
   num_valid_votes: valid_votes.length,
   num_invalid_votes: invalid_votes.length,
