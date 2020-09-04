@@ -18,12 +18,10 @@ def abort(message)
   exit 1
 end
 
-# Our report template.
-REPORTS = ['report.md', 'report-redacted.md'].freeze
-
 # Parse options.
 options = {
   cutoff: 6,
+  report: 'report',
   year: Time.now.year
 }
 
@@ -127,6 +125,7 @@ if total_bucket_votes != all_votes.length
     "(#{total_bucket_votes} but should be #{all_votes.length})"
 end
 
+# Configure report.
 report = {
   year: options[:year],
   num_members: all_members.length,
@@ -138,8 +137,10 @@ report = {
   invalid: invalid_votes
 }
 
-REPORTS.each do |name|
-  temp = ::File.expand_path("#{name}.erb", ::File.join(__dir__, 'templates'))
-  output = ::File.expand_path(name, __dir__)
-  ::File.write(output, Tilt.new(temp).render(self, report: report))
-end
+# Write report.
+basename = "#{options[:report]}.md"
+template = ::File.expand_path(
+  "#{basename}.erb", ::File.join(__dir__, 'templates')
+)
+output = ::File.expand_path(basename, __dir__)
+::File.write(output, Tilt.new(template).render(self, report: report))
