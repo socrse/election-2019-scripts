@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# (c) 2019 The Society of Research Software Engineering
+# (c) 2019, 2020 The Society of Research Software Engineering
 #
 # Authors: Robert Haines and Mark Turner
 
@@ -10,6 +10,7 @@ require 'bundler'
 require 'csv'
 require 'erb'
 require 'tilt'
+require 'optparse'
 
 # Helper method for exiting on error.
 def abort(message)
@@ -23,30 +24,39 @@ VOTING_CUTOFF = 12
 # Our report template.
 REPORTS = ['report.md', 'report-redacted.md'].freeze
 
-# Usage text.
-USAGE = "Usage:\t#{::File.basename($0)} <csv members file> <csv voters file>"
+# Parse options.
+options = {}
+opts = OptionParser.new do |opt|
+  opt.banner = 'Usage: report [options] <csv members file> <csv voters file>'
+  opt.separator '  Validate and report on SocRSE Trustee Voting. [options]:'
 
-# Do we have enough arguments?
-if ARGV.length == 2
-  # Read the list of society members
-  members_file = ARGV[0].chomp
-  unless ::File.readable? members_file
-    abort "Cannot read input file '#{members_file}'."
+  opt.on_tail('-h', '-?', '--help', 'Show this help message.') do
+    puts opts
+    exit
   end
-  members_data = ::File.read(members_file)
-
-  # Read the list of voters
-  voters_file = ARGV[1].chomp
-  unless ::File.readable? voters_file
-    abort "Cannot read input file '#{voters_file}'."
-  end
-  voters_data = ::File.read(voters_file)
-else
-  abort USAGE
 end
+opts.parse! ARGV
+
+# Do we have enough arguments left?
+abort opts unless ARGV.length == 2
+
+options[:members] = ARGV[0].chomp
+options[:voters] = ARGV[1].chomp
+
+# Read the list of society members.
+unless ::File.readable? options[:members]
+  abort "Cannot read input file '#{options[:members]}'."
+end
+members_data = ::File.read(options[:members])
+
+# Read the list of voters.
+unless ::File.readable? options[:voters]
+  abort "Cannot read input file '#{options[:voters]}'."
+end
+voters_data = ::File.read(options[:voters])
 
 # If at this point we have no data, then...
-abort USAGE if members_data.empty? || voters_data.empty?
+abort opts if members_data.empty? || voters_data.empty?
 
 members = ::CSV.new(members_data, headers: true)
 voters = ::CSV.new(voters_data, headers: true)
