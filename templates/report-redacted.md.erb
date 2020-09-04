@@ -38,3 +38,7 @@ Invalid votes were received from the following people. Votes are marked invalid 
 <% report[:invalid].each do |_| %>
   * -redacted-
 <% end %>
+
+----
+
+This report was generated at <%= Time.now.strftime('%T, %-d %B %Y') %>.
