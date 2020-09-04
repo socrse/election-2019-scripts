@@ -18,17 +18,24 @@ def abort(message)
   exit 1
 end
 
-# This many candidates are to be elected.
-VOTING_CUTOFF = 12
-
 # Our report template.
 REPORTS = ['report.md', 'report-redacted.md'].freeze
 
 # Parse options.
-options = {}
+options = {
+  cutoff: 6
+}
+
 opts = OptionParser.new do |opt|
   opt.banner = 'Usage: report [options] <csv members file> <csv voters file>'
   opt.separator '  Validate and report on SocRSE Trustee Voting. [options]:'
+
+  opt.on(
+    '-cN', '--cutoff=N', 'How many candidates to elect. ' \
+    "Default: #{options[:cutoff]}."
+  ) do |val|
+    options[:cutoff] = val.chomp.to_i
+  end
 
   opt.on_tail('-h', '-?', '--help', 'Show this help message.') do
     puts opts
@@ -118,7 +125,8 @@ report = {
   num_valid_votes: valid_votes.length,
   num_invalid_votes: invalid_votes.length,
   turnout: turnout,
-  results: [vote_buckets[0...VOTING_CUTOFF], vote_buckets[VOTING_CUTOFF..-1]],
+  results:
+    [vote_buckets[0...options[:cutoff]], vote_buckets[options[:cutoff]..-1]],
   invalid: invalid_votes
 }
 
