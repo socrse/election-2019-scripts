@@ -1,7 +1,7 @@
-# SocRSE Trustee Election 2019 Report
+# SocRSE Trustee Elections Reporting
 ## Robert Haines and Mark Turner
 
-Validate and count votes for the SocRSE Trustee Election 2019.
+Validate and count votes for the SocRSE Trustee Elections.
 
 ## Setup
 
@@ -24,19 +24,21 @@ $ gem install bundler
 $ bundle install
 ```
 
-## Creating the election reports
+## Creating the election report
 
-This script takes a list of society members and voters, and produces two reports containing the result of the election; one is a full report, the second (redacted) does not display the numbers of votes cast for each candidate. The script validates the votes against the list of members, and then counts the number of votes for each candidate.
+This script takes a list of society members and voters, and produces a report containing the result of the election. The default report shows full detail, including the numbers of votes cast for each candidate. A redacted report can also be generated, which just shows who is elected and who is not. The script validates the votes against the list of members, and then counts the number of votes for each candidate.
 
-The reports include details of any invalid votes received.
+The full report also includes details of any invalid votes received; the redacted report simply shows numbers of invalid votes.
 
 ### Usage
 
-Run the script, providing the correct inputs:
+Run the script, providing the correct inputs. To create a full report, simply:
 
 ```shell
 $ ./report <csv members file> <csv voters file>
 ```
+
+Add the `-r` or `--redact` flag to create a redacted report. You can get full details of all report options by using the `-h`, `-?` or `--help` flags.
 
 The reports can be turned into PDF format using `pandoc`:
 
