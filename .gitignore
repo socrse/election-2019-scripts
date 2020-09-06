@@ -1,6 +1,6 @@
 .ruby-version
 .ruby-gemset
-**/*.csv
+/*.csv
 **/*.md
 **/*.pdf
 **/.DS_Store
