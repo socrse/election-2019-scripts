@@ -1,0 +1,126 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# (c) 2020 The Society of Research Software Engineering
+#
+# Author: Robert Haines
+
+require 'rubygems'
+require 'bundler'
+require 'csv'
+
+USAGE = 'Usage: anon <csv members file> <csv voters file>'
+
+ANON_TEMPLATES = {
+  firstname: 'given_',
+  lastname: 'family_',
+  email: 'given.family_@example.com',
+  invalid_voter: 'invalid voter_',
+  invalid_voter_email: 'invalid_@example.com',
+  candidate: 'candidate_'
+}.freeze
+
+PRESERVE_COLUMNS = [
+  'First name',
+  'Last name',
+  'Email',
+  'Membership status'
+].freeze
+
+# Helper method for exiting on error.
+def abort(message)
+  warn message
+  exit 1
+end
+
+# Do we have enough arguments?
+abort USAGE unless ARGV.length == 2
+
+members_file = ARGV[0].chomp
+voters_file = ARGV[1].chomp
+
+# Read the list of society members.
+unless ::File.readable? members_file
+  abort "Cannot read input file '#{members_file}'."
+end
+members_data = ::File.read(members_file)
+
+# Read the list of voters.
+unless ::File.readable? voters_file
+  abort "Cannot read input file '#{voters_file}'."
+end
+voters_data = ::File.read(voters_file)
+
+# If at this point we have no data, then...
+abort USAGE if members_data.empty? || voters_data.empty?
+
+anon_members_file = members_file.split('.').join('_anon.')
+anon_voters_file = voters_file.split('.').join('_anon.')
+
+members = ::CSV.new(members_data, headers: true, return_headers: true)
+voters = ::CSV.new(voters_data, headers: true, return_headers: true)
+
+person_map = {}
+
+# Anonymise members. Just need name, email address and membership status.
+::CSV.open(anon_members_file, 'wb') do |out|
+  members.each do |row|
+    unless row.header_row?
+      id = row[0].to_i
+      name = row[3] + ' ' + row[4]
+      email = ANON_TEMPLATES[:email].split('_').join("_#{id}")
+      first = ANON_TEMPLATES[:firstname] + id.to_s
+      last = ANON_TEMPLATES[:lastname] + id.to_s
+
+      person_map[row[5].downcase] = [first + ' ' + last, email]
+
+      row[3] = first
+      row[4] = last
+      row[5] = email
+
+      row.each do |header, _|
+        next if PRESERVE_COLUMNS.include? header
+
+        row[header] = ''
+      end
+    end
+
+    out << row
+  end
+end
+
+# Anonymise votes, using the email mapping generated above.
+invalid_voter_id = 0
+candidate_id = 0
+candidate_map = {}
+
+::CSV.open(anon_voters_file, 'wb') do |out|
+  voters.each do |row|
+    unless row.header_row?
+      row[0] = ''
+
+      map = person_map[row[2].downcase]
+      if map.nil?
+        row[1] = ANON_TEMPLATES[:invalid_voter] + invalid_voter_id.to_s
+        row[2] = ANON_TEMPLATES[:invalid_voter_email]
+                   .split('_').join("_#{invalid_voter_id}")
+        invalid_voter_id += 1
+      else
+        row[1] = map[0]
+        row[2] = map[1]
+      end
+
+      row[3] = row[3].split(',').map(&:strip).map do |c|
+        if candidate_map.include? c
+          candidate_map[c]
+        else
+          candidate = ANON_TEMPLATES[:candidate] + candidate_id.to_s
+          candidate_id += 1
+          candidate_map[c] = candidate
+        end
+      end.join(', ')
+    end
+
+    out << row
+  end
+end
