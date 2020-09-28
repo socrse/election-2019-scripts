@@ -101,8 +101,11 @@ end
 # Store two lists of valid and invalid votes.
 valid_votes = []
 invalid_votes = []
+voters_seen = []
 voters.each do |voter|
   email = voter[2].downcase
+  puts "Multiple votes by #{email} detected!" if voters_seen.include?(email)
+  voters_seen << email
 
   if overdue_members.has_key?(email)
     all_members << email if Date.parse(voter[0]) <= overdue_members[email]
