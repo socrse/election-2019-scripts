@@ -80,8 +80,8 @@ members = ::CSV.new(members_data, headers: true)
 voters = ::CSV.new(voters_data, headers: true)
 
 # Grab all of the valid members into one long list, keeping expired members
-# to one side for now - with their expiry date.
-# Also, count the number of non-members.
+# to one side for now - with their expiry date. Overdue members get three
+# months grace. Also, count the number of non-members.
 valid_col = options[:year] == 2019 ? 22 : 7
 all_members = []
 overdue_members = {}
@@ -89,7 +89,9 @@ num_nonmembers = 0
 members.each do |row|
   if row[valid_col] == 'Valid'
     all_members << row[5].downcase
-  elsif row[valid_col] == 'Overdue' || row[valid_col] == 'Expired'
+  elsif row[valid_col] == 'Overdue'
+    overdue_members[row[5].downcase] = Date.parse(row[8]).next_month(3)
+  elsif row[valid_col] == 'Expired'
     overdue_members[row[5].downcase] = Date.parse(row[8])
   else
     num_nonmembers += 1
